@@ -1,3 +1,8 @@
+
+This is my modified version of Deep-SVDD, where I (will) replace their unsupervised loss with mine.
+
+----------
+
 # PyTorch Implementation of Deep SVDD
 This repository provides a [PyTorch](https://pytorch.org/) implementation of the *Deep SVDD* method presented in our
 ICML 2018 paper ”Deep One-Class Classification”.
