@@ -7,6 +7,7 @@ import numpy as np
 from utils.config import Config
 from utils.visualization.plot_images_grid import plot_images_grid
 from deepSVDD import DeepSVDD
+from deepSVDD import UnsupriskTrainer
 from datasets.main import load_dataset
 
 
@@ -22,7 +23,7 @@ from datasets.main import load_dataset
               help='Config JSON-file path (default: None).')
 @click.option('--load_model', type=click.Path(exists=True), default=None,
               help='Model file path (default: None).')
-@click.option('--objective', type=click.Choice(['one-class', 'soft-boundary']), default='one-class',
+@click.option('--objective', type=click.Choice(['exact', 'approx']), default='approx',
               help='Specify Deep SVDD objective ("one-class" or "soft-boundary").')
 @click.option('--nu', type=float, default=0.1, help='Deep SVDD hyperparameter nu (must be 0 < nu <= 1).')
 @click.option('--device', type=str, default='cuda', help='Computation device to use ("cpu", "cuda", "cuda:2", etc.).')

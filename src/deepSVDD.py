@@ -3,7 +3,7 @@ import torch
 
 from base.base_dataset import BaseADDataset
 from networks.main import build_network, build_autoencoder
-from optim.deepSVDD_trainer import DeepSVDDTrainer
+from optim.deepSVDD_trainer import UnsupriskTrainer
 from optim.ae_trainer import AETrainer
 
 
@@ -25,15 +25,13 @@ class DeepSVDD(object):
         results: A dictionary to save the results.
     """
 
-    def __init__(self, objective: str = 'one-class', nu: float = 0.1):
+    def __init__(self, objective: str = 'approx', nu: float = 0.1):
         """Inits DeepSVDD with one of the two objectives and hyperparameter nu."""
 
-        assert objective in ('one-class', 'soft-boundary'), "Objective must be either 'one-class' or 'soft-boundary'."
+        assert objective in ('exact', 'approx'), "Objective must be either 'exact' or 'approx'."
         self.objective = objective
         assert (0 < nu) & (nu <= 1), "For hyperparameter nu, it must hold: 0 < nu <= 1."
         self.nu = nu
-        self.R = 0.0  # hypersphere radius R
-        self.c = None  # hypersphere center c
 
         self.net_name = None
         self.net = None  # neural network \phi
@@ -63,20 +61,19 @@ class DeepSVDD(object):
         """Trains the Deep SVDD model on the training data."""
 
         self.optimizer_name = optimizer_name
-        self.trainer = DeepSVDDTrainer(self.objective, self.R, self.c, self.nu, optimizer_name, lr=lr,
+        # TODO recuperer la embeddim proprement
+        self.trainer = UnsupriskTrainer(32,self.objective, self.nu, optimizer_name, lr=lr,
                                        n_epochs=n_epochs, lr_milestones=lr_milestones, batch_size=batch_size,
                                        weight_decay=weight_decay, device=device, n_jobs_dataloader=n_jobs_dataloader)
         # Get the model
         self.net = self.trainer.train(dataset, self.net)
-        self.R = float(self.trainer.R.cpu().data.numpy())  # get float
-        self.c = self.trainer.c.cpu().data.numpy().tolist()  # get list
         self.results['train_time'] = self.trainer.train_time
 
     def test(self, dataset: BaseADDataset, device: str = 'cuda', n_jobs_dataloader: int = 0):
         """Tests the Deep SVDD model on the test data."""
 
         if self.trainer is None:
-            self.trainer = DeepSVDDTrainer(self.objective, self.R, self.c, self.nu,
+            self.trainer = UnsupriskTrainer(32,self.objective, self.nu,
                                            device=device, n_jobs_dataloader=n_jobs_dataloader)
 
         self.trainer.test(dataset, self.net)
